@@ -198,6 +198,11 @@ function(trusted_firmware_build)
     message(FATAL_ERROR "Unsupported ZEPHYR_TOOLCHAIN_VARIANT: ${ZEPHYR_TOOLCHAIN_VARIANT}")
   endif()
 
+  # Custom script loading
+  if (EXISTS ${APPLICATION_SOURCE_DIR}/tfm/config.cmake)
+      set(TFM_EXTRA_CONFIG_ARG -DTFM_EXTRA_CONFIG_PATH=${APPLICATION_SOURCE_DIR}/tfm/config.cmake)
+  endif()
+
   file(MAKE_DIRECTORY ${TFM_BINARY_DIR})
   add_custom_target(tfm_cmake
     COMMAND ${CMAKE_COMMAND}
@@ -212,6 +217,7 @@ function(trusted_firmware_build)
       ${TFM_REGRESSION_S_ARG}
       ${TFM_REGRESSION_NS_ARG}
       ${TFM_PROFILE_ARG}
+      ${TFM_EXTRA_CONFIG_ARG}
       ${MCUBOOT_IMAGE_NUM_ARG}
       ${PSA_TEST_ARG}
       ${TFM_CMAKE_ARGS}
