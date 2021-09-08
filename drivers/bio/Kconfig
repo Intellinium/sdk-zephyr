@@ -1,0 +1,22 @@
+# Bio sensor configuration options
+
+# Copyright (c) 2021 Intellinium <giuliano.franchetto@intellinium.cio>
+# SPDX-License-Identifier: Apache-2.0
+
+#
+# Bio sensor options
+#
+menuconfig BIO_SENSOR
+	bool "Bio sensor drivers"
+	help
+	  Enable Bio sensor driver configuration.
+
+if (BIO_SENSOR)
+
+module = BIO_SENSOR
+module-str = BIO_SENSOR
+source "subsys/logging/Kconfig.template.log_config"
+
+source "drivers/bio/Kconfig.max32664"
+
+endif
