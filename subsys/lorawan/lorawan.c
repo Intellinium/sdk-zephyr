@@ -303,6 +303,7 @@ int lorawan_join(const struct lorawan_join_config *join_cfg)
 		k_sem_take(&mlme_confirm_sem, K_FOREVER);
 		if (last_mlme_confirm_status != LORAMAC_EVENT_INFO_STATUS_OK) {
 			ret = lorawan_eventinfo2errno(last_mlme_confirm_status);
+			LOG_ERR("Network join error: %d", last_mlme_confirm_status);
 			goto out;
 		}
 	} else if (join_cfg->mode == LORAWAN_ACT_ABP) {
