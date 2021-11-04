@@ -577,7 +577,11 @@ int lorawan_start(void)
 	return 0;
 }
 
-static int lorawan_init(const struct device *dev)
+#if !defined(CONFIG_LORAWAN_NVM_NONE)
+#include "nvm/lorawan_nvm.h"
+#endif
+
+int lorawan_init(void)
 {
 	LoRaMacStatus_t status;
 
@@ -589,8 +593,13 @@ static int lorawan_init(const struct device *dev)
 	macPrimitives.MacMlmeIndication = MlmeIndication;
 	macCallbacks.GetBatteryLevel = getBatteryLevelLocal;
 	macCallbacks.GetTemperatureLevel = NULL;
+#if !defined(CONFIG_LORAWAN_NVM_NONE)
+	macCallbacks.NvmDataChange = lorawan_nvm_data_mgmt_event;
+#else
 	macCallbacks.NvmDataChange = NULL;
+#endif
 	macCallbacks.MacProcessNotify = OnMacProcessNotify;
+
 
 	status = LoRaMacInitialization(&macPrimitives, &macCallbacks,
 				       LORAWAN_REGION);
@@ -600,9 +609,15 @@ static int lorawan_init(const struct device *dev)
 		return -EINVAL;
 	}
 
+#if !defined(CONFIG_LORAWAN_NVM_NONE)
+	/* The restore must be before calling LoRaMacInitialization
+	 * as we need to reload all the keys for the crypto and secure
+	 * element module to init properly */
+	lorawan_nvm_data_restore();
+#endif
+
+
 	LOG_DBG("LoRaMAC Initialized");
 
 	return 0;
 }
-
-SYS_INIT(lorawan_init, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEVICE);

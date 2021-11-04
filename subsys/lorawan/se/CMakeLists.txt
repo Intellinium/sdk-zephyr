@@ -1,0 +1,1 @@
+add_subdirectory_ifdef(CONFIG_LORAWAN_SE_NRFX nrfx-se)
