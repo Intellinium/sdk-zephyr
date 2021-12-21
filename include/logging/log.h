@@ -28,6 +28,52 @@ extern "C" {
  * @{
  */
 
+#if defined(__JETBRAINS_IDE__) || defined(__clang__) || defined (PARASOFT_CPPTEST)
+
+/* This include is kept to mimic behavior between IDE and "normal" build */
+#include <zephyr.h>
+
+__attribute__((format(printf, 1, 2)))
+static inline void log_noop(char *fmt, ...)
+{
+
+}
+
+static inline void log_hexdump_noop(const void * data, size_t length,
+	const char * str)
+{
+
+}
+
+#define LOG_DBG(...)	log_noop(__VA_ARGS__)
+
+#define LOG_INF(...)	log_noop(__VA_ARGS__)
+
+#define LOG_WRN(...)	log_noop(__VA_ARGS__)
+
+#define LOG_ERR(...)	log_noop(__VA_ARGS__)
+
+#define LOG_PRINTK(...)	log_noop(__VA_ARGS__)
+
+#define LOG_HEXDUMP_ERR(_data, _length, _str)\
+			log_hexdump_noop(_data, _length, _str)
+
+#define LOG_HEXDUMP_WRN(_data, _length, _str)\
+			log_hexdump_noop(_data, _length, _str)
+
+#define LOG_HEXDUMP_INF(_data, _length, _str)\
+			log_hexdump_noop(_data, _length, _str)
+
+#define LOG_HEXDUMP_DBG(_data, _length, _str)\
+			log_hexdump_noop(_data, _length, _str)
+
+static inline char *log_strdup(const char *str)
+{
+	return 0;
+}
+
+#else /* defined(__CLION_IDE__) || defined(PARASOFT) || defined (PARASOFT_CPPTEST) */
+
 /**
  * @brief Writes an ERROR level message to the log.
  *
@@ -296,6 +342,8 @@ static inline char *log_strdup(const char *str)
 	return z_log_strdup(str);
 }
 
+#endif /* defined(__CLION_IDE__) || defined(PARASOFT) || defined (PARASOFT_CPPTEST) */
+
 #ifdef __cplusplus
 }
 #define LOG_IN_CPLUSPLUS 1
@@ -470,3 +518,5 @@ static inline char *log_strdup(const char *str)
  */
 
 #endif /* ZEPHYR_INCLUDE_LOGGING_LOG_H_ */
+
+
