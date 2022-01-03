@@ -419,6 +419,13 @@ static int sx126x_lora_init(const struct device *dev)
 
 	LOG_DBG("Initializing %s", DT_INST_LABEL(0));
 
+	LOG_DBG("Turning ON LoRa with EN pin GPIO0_5");
+
+	const struct device *gpio0 =
+		device_get_binding(DT_LABEL(DT_NODELABEL(gpio0)));
+	gpio_pin_configure(gpio0, 5, GPIO_OUTPUT | GPIO_PULL_UP);
+	gpio_pin_set(gpio0, 5, 1);
+
 	if (sx12xx_configure_pin(antenna_enable, GPIO_OUTPUT_INACTIVE) ||
 	    sx12xx_configure_pin(rx_enable, GPIO_OUTPUT_INACTIVE) ||
 	    sx12xx_configure_pin(tx_enable, GPIO_OUTPUT_INACTIVE)) {

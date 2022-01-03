@@ -56,6 +56,7 @@ static void sx126x_dio1_irq_callback(const struct device *dev,
 	struct sx126x_data *dev_data = CONTAINER_OF(cb, struct sx126x_data,
 						    dio1_irq_callback);
 
+	LOG_WRN("DIO1 IRQ");
 	if (pins & BIT(sx126x_gpio_dio1.pin)) {
 		k_work_submit(&dev_data->dio1_irq_work);
 	}
