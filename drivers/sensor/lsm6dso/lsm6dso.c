@@ -742,19 +742,20 @@ static int lsm6dso_init_chip(const struct device *dev)
 	uint8_t chip_id;
 
 	if (lsm6dso_device_id_get(ctx, &chip_id) < 0) {
-		LOG_DBG("Failed reading chip id");
+		LOG_ERR("Failed reading chip id");
 		return -EIO;
 	}
 
 	LOG_INF("chip id 0x%x", chip_id);
 
 	if (chip_id != LSM6DSO_ID) {
-		LOG_DBG("Invalid chip id 0x%x", chip_id);
+		LOG_ERR("Invalid chip id 0x%x", chip_id);
 		return -EIO;
 	}
 
 	/* reset device */
 	if (lsm6dso_reset_set(ctx, 1) < 0) {
+		LOG_ERR("Could not reset LSM");
 		return -EIO;
 	}
 
@@ -762,37 +763,37 @@ static int lsm6dso_init_chip(const struct device *dev)
 
 	if (lsm6dso_accel_set_fs_raw(dev,
 				     LSM6DSO_DEFAULT_ACCEL_FULLSCALE) < 0) {
-		LOG_DBG("failed to set accelerometer full-scale");
+		LOG_ERR("failed to set accelerometer full-scale");
 		return -EIO;
 	}
 	lsm6dso->acc_gain = LSM6DSO_DEFAULT_ACCEL_SENSITIVITY;
 
 	lsm6dso->accel_freq = lsm6dso_odr_to_freq_val(CONFIG_LSM6DSO_ACCEL_ODR);
 	if (lsm6dso_accel_set_odr_raw(dev, CONFIG_LSM6DSO_ACCEL_ODR) < 0) {
-		LOG_DBG("failed to set accelerometer sampling rate");
+		LOG_ERR("failed to set accelerometer sampling rate");
 		return -EIO;
 	}
 
 	if (lsm6dso_gyro_set_fs_raw(dev, LSM6DSO_DEFAULT_GYRO_FULLSCALE) < 0) {
-		LOG_DBG("failed to set gyroscope full-scale");
+		LOG_ERR("failed to set gyroscope full-scale");
 		return -EIO;
 	}
 	lsm6dso->gyro_gain = LSM6DSO_DEFAULT_GYRO_SENSITIVITY;
 
 	lsm6dso->gyro_freq = lsm6dso_odr_to_freq_val(CONFIG_LSM6DSO_GYRO_ODR);
 	if (lsm6dso_gyro_set_odr_raw(dev, CONFIG_LSM6DSO_GYRO_ODR) < 0) {
-		LOG_DBG("failed to set gyroscope sampling rate");
+		LOG_ERR("failed to set gyroscope sampling rate");
 		return -EIO;
 	}
 
 	/* Set FIFO bypass mode */
 	if (lsm6dso_fifo_mode_set(ctx, LSM6DSO_BYPASS_MODE) < 0) {
-		LOG_DBG("failed to set FIFO mode");
+		LOG_ERR("failed to set FIFO mode");
 		return -EIO;
 	}
 
 	if (lsm6dso_block_data_update_set(ctx, 1) < 0) {
-		LOG_DBG("failed to set BDU mode");
+		LOG_ERR("failed to set BDU mode");
 		return -EIO;
 	}
 

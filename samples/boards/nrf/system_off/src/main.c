@@ -12,8 +12,6 @@
 #include "retained.h"
 #include <hal/nrf_gpio.h>
 
-#define CONSOLE_LABEL DT_LABEL(DT_CHOSEN(zephyr_console))
-
 #define BUSY_WAIT_S 2U
 #define SLEEP_S 2U
 
@@ -34,11 +32,14 @@ static int disable_ds_1(const struct device *dev)
 
 SYS_INIT(disable_ds_1, PRE_KERNEL_2, 0);
 
+#include <device.h>
+#include <drivers/gpio.h>
 void main(void)
 {
 	int rc;
-	const struct device *cons = device_get_binding(CONSOLE_LABEL);
-
+	const struct device *uart0 = device_get_binding("UART_0");
+	const struct device *uart1 = device_get_binding("UART_1");
+	
 	printk("\n%s system off demo\n", CONFIG_BOARD);
 
 	if (IS_ENABLED(CONFIG_APP_RETENTION)) {
@@ -58,7 +59,7 @@ void main(void)
 
 	/* Configure to generate PORT event (wakeup) on button 1 press. */
 	nrf_gpio_cfg_input(DT_GPIO_PIN(DT_NODELABEL(button0), gpios),
-			   NRF_GPIO_PIN_PULLUP);
+			   NRF_GPIO_PIN_NOPULL);
 	nrf_gpio_cfg_sense_set(DT_GPIO_PIN(DT_NODELABEL(button0), gpios),
 			       NRF_GPIO_PIN_SENSE_LOW);
 
@@ -66,20 +67,59 @@ void main(void)
 	k_busy_wait(BUSY_WAIT_S * USEC_PER_SEC);
 
 	printk("Busy-wait %u s with UART off\n", BUSY_WAIT_S);
-	rc = pm_device_state_set(cons, PM_DEVICE_STATE_SUSPENDED);
+	if (uart0) {
+		rc = pm_device_state_set(uart0, PM_DEVICE_STATE_SUSPENDED);
+	}
+	if (uart1) {
+		rc = pm_device_state_set(uart1, PM_DEVICE_STATE_SUSPENDED);
+	}
 	k_busy_wait(BUSY_WAIT_S * USEC_PER_SEC);
-	rc = pm_device_state_set(cons, PM_DEVICE_STATE_ACTIVE);
+	if (uart0) {
+		rc = pm_device_state_set(uart0, PM_DEVICE_STATE_ACTIVE);
+	}
+	if (uart1) {
+		rc = pm_device_state_set(uart1, PM_DEVICE_STATE_ACTIVE);
+	}
 
 	printk("Sleep %u s\n", SLEEP_S);
 	k_sleep(K_SECONDS(SLEEP_S));
 
 	printk("Sleep %u s with UART off\n", SLEEP_S);
-	rc = pm_device_state_set(cons, PM_DEVICE_STATE_SUSPENDED);
+	if (uart0) {
+		rc = pm_device_state_set(uart0, PM_DEVICE_STATE_SUSPENDED);
+	}
+	if (uart1) {
+		rc = pm_device_state_set(uart1, PM_DEVICE_STATE_SUSPENDED);
+	}
 	k_sleep(K_SECONDS(SLEEP_S));
-	rc = pm_device_state_set(cons, PM_DEVICE_STATE_ACTIVE);
+	if (uart0) {
+		rc = pm_device_state_set(uart0, PM_DEVICE_STATE_ACTIVE);
+	}
+	if (uart1) {
+		rc = pm_device_state_set(uart1, PM_DEVICE_STATE_ACTIVE);
+	}
+
+#if defined(NRF_P1)
+	const struct device *gpio = device_get_binding("GPIO_1");
+	gpio_pin_configure(gpio, 2 , GPIO_OUTPUT);
+	gpio_pin_set_raw(gpio, 2, 0);
+#else
+	const struct device *gpio = device_get_binding("GPIO_0");
+	gpio_pin_configure(gpio, 0 , GPIO_OUTPUT);
+	gpio_pin_set_raw(gpio, 0, 0);
+#endif
+
+	printk("Current GPIO configurations\n");
+	printk("GPIO values: 0x%08X\n", NRF_PERIPH(NRF_P0)->IN);
+
+	for (int i = 0; i < 32; i++) {
+		printk("GPIO 0.%2d: 0x%08X\n", i,
+		       NRF_PERIPH(NRF_P0)->PIN_CNF[i]);
+	}
 
 	printk("Entering system off; press BUTTON1 to restart\n");
 
+	k_sleep(K_SECONDS(1));
 	if (IS_ENABLED(CONFIG_APP_RETENTION)) {
 		/* Update the retained state */
 		retained.off_count += 1;

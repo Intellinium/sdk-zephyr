@@ -1,0 +1,6 @@
+module=RED_NETWORK
+source "${ZEPHYR_NRF_MODULE_DIR}/subsys/partition_manager/Kconfig.template.build_strategy"
+
+# Include Zephyr's Kconfig.
+source "$ZEPHYR_BASE/Kconfig"
+

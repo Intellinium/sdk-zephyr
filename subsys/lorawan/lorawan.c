@@ -461,7 +461,7 @@ int lorawan_set_conf_msg_tries(uint8_t tries)
 }
 
 int lorawan_send(uint8_t port, uint8_t *data, uint8_t len,
-		 enum lorawan_message_type type)
+		 uint8_t flags)
 {
 	LoRaMacStatus_t status;
 	McpsReq_t mcpsReq;

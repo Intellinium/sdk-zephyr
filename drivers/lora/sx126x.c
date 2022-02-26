@@ -352,7 +352,9 @@ void SX126xSetRfTxPower(int8_t power)
 
 void SX126xWaitOnBusy(void)
 {
-	while (sx126x_is_busy(&dev_data)) {
+	/* INTELLINIUM: break potential infinite loop */
+	size_t counter = 100;
+	while (sx126x_is_busy(&dev_data) && counter--) {
 		k_sleep(K_MSEC(1));
 	}
 }
@@ -423,7 +425,7 @@ static int sx126x_lora_init(const struct device *dev)
 
 	const struct device *gpio0 =
 		device_get_binding(DT_LABEL(DT_NODELABEL(gpio0)));
-	gpio_pin_configure(gpio0, 5, GPIO_OUTPUT | GPIO_PULL_UP);
+	gpio_pin_configure(gpio0, 5, GPIO_OUTPUT);
 	gpio_pin_set(gpio0, 5, 1);
 
 	if (sx12xx_configure_pin(antenna_enable, GPIO_OUTPUT_INACTIVE) ||
